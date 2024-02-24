@@ -3,12 +3,15 @@ from pydantic import BaseModel
 from models.plant import Plant, AddPlant
 
 
-class Controller(BaseModel):
-    controller_id: uuid.UUID = uuid.uuid4()
+class AddController(BaseModel):
     plants_list: list[Plant]
 
+
+class Controller(AddController):
+    controller_id: uuid.UUID = uuid.uuid4()
+
     def add_plant(self, data: AddPlant):
-        plant = Plant(plant_id=uuid.uuid4(), **data.model_dump())
+        plant = Plant(**data.model_dump())
         return self.plants_list.append(plant)
 
     def get_plant(self, id_plant: uuid.UUID):
@@ -53,5 +56,3 @@ class Controller(BaseModel):
         if all_pins:
             return list(pin.pin_value == new_data for pin in all_pins if pin.pin_num == pin_num)
         return False
-
-
