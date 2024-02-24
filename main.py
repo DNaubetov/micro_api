@@ -48,9 +48,9 @@ def write_pin(controller_id: int, pin_num: int, data: AddPinData) -> bool:
 
 
 @app.post("/api/v2/add/plant")
-def add_new_plant(data: AddPlant) -> dict:
-    return {'status': esp32.add_plant(data),
-            'id': esp32.plants_list[-1]}
+def add_new_plant(data: AddPlant) -> Plant:
+    esp32.add_plant(data)
+    return esp32.plants_list[-1]
 
 
 @app.put("/api/v2/up")
