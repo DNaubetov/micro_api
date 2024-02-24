@@ -1,9 +1,23 @@
-Данный проект реализцуется для АО ТЭС
+# Данный проект реализцуется для АО ТЭС
+>Что тут есть
 
-запуск:
+    models - Pydantic модели
+    routes - Маршруты
+    template - Шаблоны HTML
+    utilets - Дополнительные скрипты
+>Требование
 
-git clone https://github.com/DNaubetov/micro_api.git
+      • Git
+      • Python 3.12.1
 
-pip install requirements.txt
 
-python3 main.py
+
+>Клонируем репозиторий куда удобно
+
+    git clone https://github.com/DNaubetov/micro_api.git
+>Установка зависимости
+
+    pip install requirements.txt
+>Запуск проекта
+
+    python3 main.py
