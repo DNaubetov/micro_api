@@ -8,7 +8,6 @@ get_one = APIRouter(prefix="/api/v2/get", tags=["get One"])
 
 
 @get_one.get("/plant/{id_plant}")
-def get_one_plant(id_plant: uuid.UUID) -> Plant | str:
+async def get_one_plant(id_plant: uuid.UUID) -> Plant | str:
     return esp32.get_plant(id_plant)
-
 

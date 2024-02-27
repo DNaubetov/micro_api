@@ -2,11 +2,14 @@ from pydantic import BaseModel
 
 
 class AddPinData(BaseModel):
-    pin_value: bool | str | None
+    pin_value: bool | str | None = None
 
 
 class Pin(AddPinData):
     pin_num: int
-    pin_type: str
+    pin_state: bool = False
 
 
+class PinControl(AddPinData):
+    pin_num: int
+    pin_value: bool = False
