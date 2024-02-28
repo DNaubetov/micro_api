@@ -4,30 +4,24 @@ from models.pin import Pin, AddPinData, PinControl
 from models.plant import Plant, AddPlant
 from models.controller import Controller
 
-flower1 = Plant(plant_id=uuid.uuid4(), name='Rose red', capacity=500,
-                pin_soil=Pin(pin_num=32),
-                pin_pomp=PinControl(pin_num=2))
-
-flower2 = Plant(plant_id=uuid.uuid4(),name='Rose blue', capacity=600,
+flower1 = Plant(plant_id=uuid.uuid4(), name='Цветок 1', capacity=10000,
                 pin_soil=Pin(pin_num=36),
-                pin_pomp=PinControl(pin_num=4))
+                pin_pomp=PinControl(pin_num=15), num_p=1)
 
-# flower3 = Plant(plant_id=uuid.uuid4(), name='Rose white', capacity=700,
-#                 pin_soil=Pin(pin_num=34),
-#                 pin_pomp=PinControl(pin_num=15))
-#
-# flower4 = Plant(plant_id=uuid.uuid4(), name='Rose yellow', capacity=800,
-#                 pin_soil=Pin(pin_num=35),
-#                 pin_pomp=PinControl(pin_num=16))
-#
-esp32 = Controller(plants_list=[flower1, flower2])
-#
-#
-# a = AddPlant(name='Rose red', capacity=1,
-#              pin_soil=Pin(pin_num=32),
-#              pin_pomp=PinControl(pin_num=2))
-#
-# esp32.add_plant(a)
+flower2 = Plant(plant_id=uuid.uuid4(), name='Цветок 2', capacity=20000,
+                pin_soil=Pin(pin_num=39),
+                pin_pomp=PinControl(pin_num=2), num_p=2)
 
-for i in esp32.plants_list:
-    print(i.plant_id)
+flower3 = Plant(plant_id=uuid.uuid4(), name='Цветок 3', capacity=20000,
+                pin_soil=Pin(pin_num=34),
+                pin_pomp=PinControl(pin_num=4), num_p=3)
+
+flower4 = Plant(plant_id=uuid.uuid4(), name='Цветок 4', capacity=20000,
+                pin_soil=Pin(pin_num=32),
+                pin_pomp=PinControl(pin_num=16), num_p=4)
+
+flower5 = Plant(plant_id=uuid.uuid4(), name='Цветок 5', capacity=10000,
+                pin_soil=Pin(pin_num=33),
+                pin_pomp=PinControl(pin_num=17), num_p=5)
+#
+esp32 = Controller(plants_list=[flower1, flower2, flower3, flower4, flower5])

@@ -1,3 +1,5 @@
+import asyncio
+import time
 import uuid
 from pydantic import BaseModel
 from models.pin import Pin, AddPinData
@@ -79,3 +81,47 @@ class Controller(AddController):
                     i.pin_state = new_state
                     return i
         return 'Pin не найден'
+
+    async def watering(self, id_plant: uuid.UUID, water_lvl: int):
+        plant = self.get_plant(id_plant)
+        print('\n\n\n\n\n\n')
+        max_lvl_water = plant.capacity / 2
+        if 0 < water_lvl < max_lvl_water:
+            self.switch_status(pin_num=plant.pin_soil.pin_num, new_state=True)
+            self.write_for_pin(plant.pin_pomp.pin_num, AddPinData(pin_value=True))
+            print(plant.pin_pomp.pin_num, plant.pin_pomp.pin_value)
+            await asyncio.sleep(water_lvl / 22)
+            self.write_for_pin(plant.pin_pomp.pin_num, AddPinData(pin_value=False))
+            self.switch_status(pin_num=plant.pin_soil.pin_num, new_state=False)
+            print(plant.pin_pomp.pin_num, plant.pin_pomp.pin_value)
+            return True
+
+        elif water_lvl > plant.capacity / 2:
+            return (f"Слишком много воды для данного растения, "
+                    f"максимально допустимый уровень {plant.capacity / 2}")
+
+    def get_plant_in_num(self, plant_num: int):
+        res = next((plant for plant in self.plants_list if plant.num_p == plant_num), None)
+
+        if res:
+            return res
+        elif res is None:
+            return 'Неверный id'
+
+    async def watering_in_num(self, num_plant: int, water_lvl: int):
+        plant = self.get_plant_in_num(num_plant)
+        print('\n\n\n\n\n\n')
+        max_lvl_water = plant.capacity / 2
+        if 0 < water_lvl < max_lvl_water:
+            self.switch_status(pin_num=plant.pin_soil.pin_num, new_state=True)
+            self.write_for_pin(plant.pin_pomp.pin_num, AddPinData(pin_value=True))
+            print(plant.pin_pomp.pin_num, plant.pin_pomp.pin_value)
+            await asyncio.sleep(water_lvl / 22)
+            self.write_for_pin(plant.pin_pomp.pin_num, AddPinData(pin_value=False))
+            self.switch_status(pin_num=plant.pin_soil.pin_num, new_state=False)
+            print(plant.pin_pomp.pin_num, plant.pin_pomp.pin_value)
+            return True
+
+        elif water_lvl > plant.capacity / 2:
+            return (f"Слишком много воды для данного растения, "
+                    f"максимально допустимый уровень {plant.capacity / 2}")
