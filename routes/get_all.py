@@ -18,6 +18,7 @@ async def pin_soil() -> list[Pin]:
 
 @get_all.get("/pin/pomp")
 async def pin_pomp() -> list[PinControl]:
+    print(esp32.get_all_pin_pomp()[1])
     return esp32.get_all_pin_pomp()
 
 

@@ -1,6 +1,6 @@
 import uuid
 import uvicorn
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, BackgroundTasks
 from utilets.add_data import esp32
 from utilets.ip import get_local_ip
 from models.pin import Pin, AddPinData
@@ -9,7 +9,10 @@ from routes.get_all import get_all
 from routes.get_one import get_one
 from fastapi.responses import FileResponse
 
-app = FastAPI(title="Soil system", version="2", openapi_tags=[{"name": "post"}])
+app = FastAPI(title="Soil system", version="2",
+              openapi_tags=[{"name": "Полив"},
+                            {"name": "post"}])
+
 app.include_router(get_all)
 app.include_router(get_one)
 
@@ -39,10 +42,10 @@ async def add_new_plant(data: AddPlant) -> Plant:
     return esp32.plants_list[-1]
 
 
-@app.post('/api/v2/manual/{id_plant}/watering', tags=['post'])
-async def watering(id_plant: uuid.UUID, water: int) -> bool:
-    await esp32.get_plant(id_plant).manual_watering(water_lvl=water)
-    return True
+@app.post("/send-notification/{id_plant}")
+async def send_notification(id_plant: uuid.UUID, water: int, background_tasks: BackgroundTasks):
+    background_tasks.add_task(esp32.watering, id_plant, water)
+    return {"message": "Notification sent in the background"}
 
 
 @app.put("/api/v2/up")
@@ -50,7 +53,13 @@ async def plant_update(id_plant: uuid.UUID, data: AddPlant):
     return esp32.update_plant(id_plant, data)
 
 
+@app.post("/watering/{plant_num}", tags=['Полив'])
+async def watering_system(plant_num: int, water: int, background_tasks: BackgroundTasks):
+    background_tasks.add_task(esp32.watering_in_num, plant_num, water)
+    return {"message": "Notification sent in the background"}
+
+
 if __name__ == "__main__":
     if get_local_ip():
         uvicorn.run("main:app", host=get_local_ip(), port=8000, reload=True, workers=3)
-    uvicorn.run("main:app", host='127.0.0.1', port=8000, reload=True, workers=3)
+    uvicorn.run("main:app", host='127.0.0.1', port=8000)
