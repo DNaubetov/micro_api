@@ -3,18 +3,31 @@ import uvicorn
 from fastapi import FastAPI, Depends, BackgroundTasks
 from utilets.add_data import esp32
 from utilets.ip import get_local_ip
-from models.pin import Pin, AddPinData
+from models.pin import PinData, PinDataPost
 from models.plant import Plant, AddPlant
-from routes.get_all import get_all
-from routes.get_one import get_one
+from database.connection import Settings
+from routes.controller import controllers_router
+from routes.plant import plants_router
+from routes.pin import pin_router
 from fastapi.responses import FileResponse
+from contextlib import asynccontextmanager
 
-app = FastAPI(title="Soil system", version="2",
-              openapi_tags=[{"name": "Полив"},
-                            {"name": "post"}])
 
-app.include_router(get_all)
-app.include_router(get_one)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await settings.initialize_database()
+    yield
+
+
+app = FastAPI(lifespan=lifespan, title="Soil system", version="2",
+              openapi_tags=[{"name": "Полив"}])
+
+settings = Settings()
+
+# app.include_router(get_one)
+app.include_router(pin_router)
+app.include_router(controllers_router, prefix="/controllers")
+app.include_router(plants_router, prefix="/plants")
 
 
 # uvicorn main:app --host 192.168.137.215 --port 8000 --reload
@@ -23,34 +36,6 @@ app.include_router(get_one)
 @app.get("/", response_class=FileResponse)
 async def root():
     return "template/index.html"
-
-
-@app.post('/api/v2/switch/{status}/{pin_num}', tags=['post'])
-async def switch(pin_num: int, status: bool):
-    return esp32.switch_status(pin_num, status)
-
-
-@app.post("/api/v2/write/{controller_id}/{pin_num}", tags=['post'])
-async def write_pin(controller_id: int, pin_num: int, data: AddPinData):
-    print(data)
-    return esp32.write_for_pin(pin_num, data)
-
-
-@app.post("/api/v2/add/plant", tags=['post'])
-async def add_new_plant(data: AddPlant) -> Plant:
-    esp32.add_plant(data)
-    return esp32.plants_list[-1]
-
-
-@app.post("/send-notification/{id_plant}")
-async def send_notification(id_plant: uuid.UUID, water: int, background_tasks: BackgroundTasks):
-    background_tasks.add_task(esp32.watering, id_plant, water)
-    return {"message": "Notification sent in the background"}
-
-
-@app.put("/api/v2/up")
-async def plant_update(id_plant: uuid.UUID, data: AddPlant):
-    return esp32.update_plant(id_plant, data)
 
 
 @app.post("/watering/{plant_num}", tags=['Полив'])
