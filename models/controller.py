@@ -1,9 +1,41 @@
 import asyncio
-import time
+from typing import List
+
+from beanie import Document
+
 import uuid
 from pydantic import BaseModel
-from models.pin import Pin, AddPinData
-from models.plant import Plant, AddPlant
+from models.pin import PinData, PinDataPost
+from models.plant import Plant, AddPlant, Plants, PlantsUpdate
+
+
+class Controllers(Document):
+    name: str
+    area: str
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "name": "name",
+                "area": "area"
+            }
+        }
+
+    class Settings:
+        name = "controllers"
+
+
+class ControllersUpdate(BaseModel):
+    name: str
+    area: str
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "name": "new_name",
+                "area": "new_area"
+            }
+        }
 
 
 class AddController(BaseModel):
@@ -65,13 +97,13 @@ class Controller(AddController):
     def get_all_pin_soil(self):
         return [i.pin_soil for i in self.plants_list]
 
-    def write_for_pin(self, pin_num: int, new_data: AddPinData):
+    def write_for_pin(self, pin_num: int, new_data: PinDataPost):
         all_pins = self.get_all_pin()
         if all_pins:
             for i in all_pins:
                 if i.pin_num == pin_num:
-                    i.pin_value = new_data.pin_value
-                    return i.pin_value
+                    i.pin_state = new_data.pin_value
+                    return i.pin_state
 
     def switch_status(self, pin_num: int, new_state: bool):
         all_pins = self.get_all_pin_soil()
@@ -88,12 +120,12 @@ class Controller(AddController):
         max_lvl_water = plant.capacity / 2
         if 0 < water_lvl < max_lvl_water:
             self.switch_status(pin_num=plant.pin_soil.pin_num, new_state=True)
-            self.write_for_pin(plant.pin_pomp.pin_num, AddPinData(pin_value=True))
-            print(plant.pin_pomp.pin_num, plant.pin_pomp.pin_value)
+            self.write_for_pin(plant.pin_pomp.pin_num, PinDataPost(pin_value=True))
+            print(plant.pin_pomp.pin_num, plant.pin_pomp.pin_state)
             await asyncio.sleep(water_lvl / 22)
-            self.write_for_pin(plant.pin_pomp.pin_num, AddPinData(pin_value=False))
+            self.write_for_pin(plant.pin_pomp.pin_num, PinDataPost(pin_value=False))
             self.switch_status(pin_num=plant.pin_soil.pin_num, new_state=False)
-            print(plant.pin_pomp.pin_num, plant.pin_pomp.pin_value)
+            print(plant.pin_pomp.pin_num, plant.pin_pomp.pin_state)
             return True
 
         elif water_lvl > plant.capacity / 2:
@@ -114,12 +146,12 @@ class Controller(AddController):
         max_lvl_water = plant.capacity / 2
         if 0 < water_lvl < max_lvl_water:
             self.switch_status(pin_num=plant.pin_soil.pin_num, new_state=True)
-            self.write_for_pin(plant.pin_pomp.pin_num, AddPinData(pin_value=True))
-            print(plant.pin_pomp.pin_num, plant.pin_pomp.pin_value)
+            self.write_for_pin(plant.pin_pomp.pin_num, PinDataPost(pin_value=True))
+            print(plant.pin_pomp.pin_num, plant.pin_pomp.pin_state)
             await asyncio.sleep(water_lvl / 22)
-            self.write_for_pin(plant.pin_pomp.pin_num, AddPinData(pin_value=False))
+            self.write_for_pin(plant.pin_pomp.pin_num, PinDataPost(pin_value=False))
             self.switch_status(pin_num=plant.pin_soil.pin_num, new_state=False)
-            print(plant.pin_pomp.pin_num, plant.pin_pomp.pin_value)
+            print(plant.pin_pomp.pin_num, plant.pin_pomp.pin_state)
             return True
 
         elif water_lvl > plant.capacity / 2:
