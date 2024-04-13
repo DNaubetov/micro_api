@@ -6,10 +6,7 @@ from models.controller import Controllers
 from models.plant import Plants
 from models.pin import PinData, PinControl, PinDataPost
 
-pin_router = APIRouter(
-    prefix="/api/pin",
-    tags=["Pin"]
-)
+pin_router = APIRouter(tags=["Pin"])
 
 plants_database = Database(Plants)
 controllers_database = Database(Controllers)

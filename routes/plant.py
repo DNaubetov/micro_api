@@ -1,8 +1,8 @@
 from typing import List, Any
-
+from core.watering import watering_in_id
 from beanie import PydanticObjectId
 from database.connection import Database
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, BackgroundTasks
 from models.plant import Plants, PlantsUpdate
 from models.controller import Controllers
 
@@ -68,3 +68,9 @@ async def delete_plant(id: PydanticObjectId) -> dict:
     return {
         "message": "Plants deleted successfully."
     }
+
+
+@plants_router.post("/watering/{plant_id}", summary="Метод для полива растения")
+async def watering_system(id: PydanticObjectId, water: int, background_tasks: BackgroundTasks) -> dict:
+    background_tasks.add_task(watering_in_id, id, water)
+    return {"message": "Полив запущен"}
